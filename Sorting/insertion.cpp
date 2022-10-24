@@ -1,6 +1,4 @@
 #include <iostream>
-#include <time.h>
-#include <stdlib.h> 
 
 void insertionSort(int *arr, int n){
     int i, key, j;
@@ -15,7 +13,6 @@ void insertionSort(int *arr, int n){
     }
 }
 
-
 void print(int *arr, int n){
     for(int i = 0; i < n; i ++){
         std::cout << arr[i] << " ";
@@ -23,10 +20,7 @@ void print(int *arr, int n){
     std::cout << std::endl;
 }
 
-
-
 int main(){
-    srand(time(NULL));
     int *arr = new int(10);
     for(int i = 0; i < 10; i ++){
         arr[i] = rand() % 100;
@@ -34,5 +28,4 @@ int main(){
     print(arr, 10);
     insertionSort(arr, 10);
     print(arr, 10);
-    return 0;
 }

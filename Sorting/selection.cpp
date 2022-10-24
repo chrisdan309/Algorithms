@@ -29,4 +29,6 @@ int main(){
     }
     print(arr, 10);
     selectionSort(arr, 10);
+    print(arr, 10);
+    return 0;
 }
