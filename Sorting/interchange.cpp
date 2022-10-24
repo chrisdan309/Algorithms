@@ -28,4 +28,5 @@ int main(){
     print(arr, 10);
     interchangeSort(arr, 10);
     print(arr, 10);           
+    return 0;
 }
