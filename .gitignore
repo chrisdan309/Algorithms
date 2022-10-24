@@ -20,3 +20,6 @@ bin/
 
 # Unignore all `.exe` in `bin` dir
 !*/bin/*.exe
+
+#Ignore dir
+.vscode/
