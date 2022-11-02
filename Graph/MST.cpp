@@ -145,6 +145,26 @@ void grafo::mostrarGrafo(){
     }
 }
 
+void dfs(grafo G, int vertice, int *v, int cont){
+    pvertice p;
+    parista a;
+    p = G.getPgrafo();
+    while(p!=NULL && p->datoOrigen != vertice+1){
+        p = p->sgteVertice;
+    }
+    if(p!=NULL){
+        a = p->adyacente;
+        while(a!=NULL){
+            if(v[a->datoDestino-1] == -1){
+                v[a->datoDestino-1] = cont;
+                dfs(G, a->datoDestino-1, v, cont);
+            }
+            a = a->sgteArista;
+        }
+    }
+
+}
+
 bool existe(parista a, int x){
     while(a!=NULL){
         if(a->datoDestino == x)
@@ -186,6 +206,30 @@ bool esConexo(grafo G){
     return true;
 }
 
+void unirSubTrees(grafo T, grafo G){
+    int n = T.numVertices(), cont = 0;
+    int * v = new int[n];
+    pvertice p = T.getPgrafo(), aux;
+    parista a;
+    for(int i = 0; i < n; i++){
+        v[i] = -1;
+    }
+
+    for(int i = 0; i < n; i++){
+        if(v[i] == -1){
+            dfs(T, i, v, cont);
+            cont++;
+            
+        }
+    }
+    cout <<"vector\n";
+    for(int i = 0; i < n; i++){
+        cout << v[i] << " ";
+    }
+    
+
+}
+
 grafo MST (grafo g){
     grafo T;
     pvertice p = g.getPgrafo();
@@ -200,18 +244,17 @@ grafo MST (grafo g){
         T.insertarArista(p->datoOrigen, a->datoDestino, a->peso);
         p = p->sgteVertice;
     }
-    while(!esConexo(T)){
-        p = g.getPgrafo();
-        t = T.getPgrafo();
-        
-    }
+    
+    unirSubTrees(T,g);
     return T;    
 }
 
 
 
+
+
 int main(){
-    grafo G;
+    grafo G, T;
     G.insertarVertice(1);
     G.insertarVertice(2);
     G.insertarVertice(3);
@@ -232,7 +275,7 @@ int main(){
     G.insertarArista(5, 8, 1);
     G.insertarArista(6, 8, 3);
     G.mostrarGrafo();
-    grafo T = MST(G);
+    T = MST(G);
     cout << "T \n";
     T.mostrarGrafo();
     return 0;
