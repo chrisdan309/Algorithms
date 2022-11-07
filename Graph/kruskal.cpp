@@ -1,6 +1,79 @@
 #include <iostream>
 using namespace std;
 
+struct nodo{
+    int data;
+    nodo *next;
+};
+
+class cola{
+    private:
+        nodo *head;
+        nodo *tail;
+    public:
+        cola();
+        ~cola();
+        void insertar(int);
+        int extraer();
+        bool colaVacia();
+};
+typedef cola *pcola;
+
+cola::cola(){
+    head = NULL;
+    tail = NULL;
+}
+
+cola::~cola(){
+    nodo *p, *rp;
+    p = head;
+    while(p!=NULL){
+        rp = p;
+        p = p->next;
+        delete rp;
+    }
+}
+
+void cola::insertar(int x){
+    nodo *p;
+    p = new nodo;
+    p->data = x;
+    p->next = NULL;
+    if(head==NULL){
+        head = p;
+        tail = p;
+    }
+    else{
+        tail->next = p;
+        tail = p;
+    }
+}
+
+int cola::extraer(){
+    nodo *p;
+    int x;
+    if(head!=NULL){
+        p = head;
+        x = p->data;
+        head = head->next;
+        delete p;
+        return x;
+    }
+    else{
+        return -1;
+    }
+}
+
+bool cola::colaVacia(){
+    if(head==NULL){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+
 struct arista{
     int datoDestino;
     int peso;
@@ -22,18 +95,25 @@ parista minimun(pvertice p);
 class grafo{
     private:
         pvertice pGrafo;
+        int numVertices;
+
     public:
         grafo();
         ~grafo();
         void insertarVertice(int x);
         void insertarArista(int x, int y, int peso);
+        void eliminarArista(int x, int y);
         void mostrarGrafo();
         pvertice getPgrafo();
-        int numVertices();
+        int getNumVertices();
+        bool existeCircuitoBFS(int);
+        grafo Prim();
+        grafo Kruskal();
 };
 
 grafo::grafo(){
     pGrafo = NULL;
+    numVertices = 0;
 }
 
 grafo::~grafo(){
@@ -72,12 +152,48 @@ void grafo::insertarArista(int x, int y, int peso){
     p = pGrafo;
     while(p!=NULL){
         if(p->datoOrigen == x){
-            if(!existe(p->adyacente, y)){
                 a = new arista;
                 a->datoDestino = y;
                 a->sgteArista = p->adyacente;
                 a->peso = peso;
                 p->adyacente = a;
+        }
+        p = p->sgteVertice;
+    }
+    p = pGrafo;
+    while(p!=NULL){
+        if(p->datoOrigen == y){
+                a = new arista;
+                a->datoDestino = x;
+                a->sgteArista = p->adyacente;
+                a->peso = peso;
+                p->adyacente = a;
+
+        }
+        p = p->sgteVertice;
+    }
+}
+
+void grafo::eliminarArista(int x, int y){
+    pvertice p;
+    parista a, ra;
+    p = pGrafo;
+    while(p!=NULL){
+        if(p->datoOrigen == x){
+            a = p->adyacente;
+            if(a->datoDestino == y){
+                p->adyacente = a->sgteArista;
+                delete a;
+            }
+            else{
+                while(a->sgteArista!=NULL){
+                    if(a->sgteArista->datoDestino == y){
+                        ra = a->sgteArista;
+                        a->sgteArista = ra->sgteArista;
+                        delete ra;
+                    }
+                    a = a->sgteArista;
+                }
             }
         }
         p = p->sgteVertice;
@@ -85,28 +201,29 @@ void grafo::insertarArista(int x, int y, int peso){
     p = pGrafo;
     while(p!=NULL){
         if(p->datoOrigen == y){
-            if(!existe(p->adyacente, x)){
-                a = new arista;
-                a->datoDestino = x;
-                a->sgteArista = p->adyacente;
-                a->peso = peso;
-                p->adyacente = a;
-
+            a = p->adyacente;
+            if(a->datoDestino == x){
+                p->adyacente = a->sgteArista;
+                delete a;
+            }
+            else{
+                while(a->sgteArista!=NULL){
+                    if(a->sgteArista->datoDestino == x){
+                        ra = a->sgteArista;
+                        a->sgteArista = ra->sgteArista;
+                        delete ra;
+                    }
+                    a = a->sgteArista;
+                }
             }
         }
         p = p->sgteVertice;
     }
 }
 
-int grafo::numVertices(){
-    pvertice p;
-    int cont = 0;
-    p = pGrafo;
-    while(p!=NULL){
-        cont++;
-        p = p->sgteVertice;
-    }
-    return cont;
+
+int grafo::getNumVertices(){
+    return numVertices;
 }
 
 void grafo::mostrarGrafo(){
@@ -123,6 +240,39 @@ void grafo::mostrarGrafo(){
         cout << endl;
         p = p->sgteVertice;
     }
+}
+
+int *pre;
+int cont;
+
+bool grafo::existeCircuitoBFS(int v){
+    pcola c;
+    c = new cola;
+    c->insertar(v);
+    pre = new int[numVertices];
+    for(int i=0; i<numVertices; i++){
+        pre[i] = -1;
+    }
+    while(!c->colaVacia()){
+        v = c->extraer();
+        pvertice p;
+        p = pGrafo;
+        while(p->datoOrigen != v){
+            p = p->sgteVertice;
+        }
+        parista a;
+        a = p->adyacente;
+        while(a!=NULL){
+            if(pre[a->datoDestino] == -1){
+                pre[a->datoDestino] = v;
+            }
+            else if(pre[v] != a->datoDestino){
+                return true;
+            }
+            a = a->sgteArista;
+        }
+    }
+    return false;
 }
 
 bool buscarCamino(grafo G, int verticeInicial, int verticeFinal){
@@ -191,7 +341,7 @@ parista minimun(pvertice p){
 
 bool esConexo(grafo G){
     pvertice p = G.getPgrafo();
-    int n = G.numVertices();
+    int n = G.getNumVertices();
     int *v = new int[n];
     for(int i = 0; i < n; i++){
         v[i] = p->datoOrigen;
@@ -210,7 +360,7 @@ bool esConexo(grafo G){
 }
 
 void unirSubTrees(grafo T, grafo G){
-    int n = T.numVertices(), cont = 0;
+    int n = T.getNumVertices(), cont = 0;
     int *v = new int[n];
     pvertice p = T.getPgrafo(), aux;
     parista a;
@@ -254,22 +404,24 @@ void unirSubTrees(grafo T, grafo G){
     }
 }
 
-grafo MST (grafo g){
+grafo grafo::Prim (){
     grafo T;
-    pvertice p = g.getPgrafo();
-    pvertice t;
-    while(p!=NULL){
+    pvertice p = pGrafo;
+    pvertice t = T.getPgrafo();
+    parista a;
+    while(p != NULL){
         T.insertarVertice(p->datoOrigen);
-        p = p->sgteVertice;
-    }
-    p = g.getPgrafo();
-    while(p!=NULL){
-        parista a = minimun(p);
+        int n = numVertices;
+        parista a ;
+        a = minimun(p);
         T.insertarArista(p->datoOrigen, a->datoDestino, a->peso);
         p = p->sgteVertice;
-    }   
-    unirSubTrees(T, g); 
+    }
     return T;
+}
+
+grafo grafo::Kruskal (){
+    
 }
 
 int main(){
@@ -289,7 +441,7 @@ int main(){
     G.insertarArista(5, 8, 1);
     G.insertarArista(6, 8, 3);
     G.mostrarGrafo();
-    T = MST(G);
+    T = G.Prim();
     cout << "T\n";
     T.mostrarGrafo();
     return 0;

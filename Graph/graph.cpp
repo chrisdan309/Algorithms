@@ -14,9 +14,6 @@ struct vertice{
 };
 typedef vertice *pvertice;
 
-//funciones
-bool existe(parista, int);
-
 class grafo{
     private:
         pvertice pGrafo;
@@ -64,24 +61,20 @@ void grafo::insertarArista(int x, int y){
     p = pGrafo;
     while(p!=NULL){
         if(p->datoOrigen == x){
-            if(!existe(p->adyacente, y)){
-                a = new arista;
-                a->datoDestino = y;
-                a->sgteArista = p->adyacente;
-                p->adyacente = a;
-            }
+            a = new arista;
+            a->datoDestino = y;
+            a->sgteArista = p->adyacente;
+            p->adyacente = a;
         }
         p = p->sgteVertice;
     }
     p = pGrafo;
     while(p!=NULL){
         if(p->datoOrigen == y){
-            if(!existe(p->adyacente, x)){
-                a = new arista;
-                a->datoDestino = x;
-                a->sgteArista = p->adyacente;
-                p->adyacente = a;
-            }
+            a = new arista;
+            a->datoDestino = x;
+            a->sgteArista = p->adyacente;
+            p->adyacente = a;
         }
         p = p->sgteVertice;
     }
@@ -102,16 +95,6 @@ void grafo::mostrarGrafo(){
         p = p->sgteVertice;
     }
 }
-
-bool existe(parista a, int x){
-    while(a!=NULL){
-        if(a->datoDestino == x)
-            return true;
-        a = a->sgteArista;
-    }
-    return false;
-}
-
 
 int main(){
     grafo G;

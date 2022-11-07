@@ -1,6 +1,5 @@
 #include <iostream>
 using namespace std;
-void algBusqueda(grafo);
 
 struct nodo{
     int data;
@@ -98,6 +97,7 @@ class grafo{
         void imprimirGrafo();
         int numVertices();
         pvertice getPgrafo();
+        bool existeCircuitoBFS(int);
 };
 
 grafo::grafo(){
@@ -195,6 +195,36 @@ pvertice grafo::getPgrafo(){
 int *pre;
 int cont;
 
+bool grafo::existeCircuitoBFS(int v){
+    pcola c;
+    c = new cola;
+    c->insertar(v);
+    pre = new int[numVertices()];
+    for(int i=0; i<numVertices(); i++){
+        pre[i] = -1;
+    }
+    while(!c->colaVacia()){
+        v = c->extraer();
+        pvertice p;
+        p = pGrafo;
+        while(p->datoOrigen != v){
+            p = p->sgteVertice;
+        }
+        parista a;
+        a = p->adyacente;
+        while(a!=NULL){
+            if(pre[a->datoDestino] == -1){
+                pre[a->datoDestino] = v;
+            }
+            else if(pre[v] != a->datoDestino){
+                return true;
+            }
+            a = a->sgteArista;
+        }
+    }
+    return false;
+}
+
 void algBusqueda(grafo g){
     cont = 0;
     int n = g.numVertices();
@@ -242,6 +272,5 @@ int main(){
     g.insertarArista(3,4);
     cout << "Vert || Aristas" << endl;
     g.imprimirGrafo();
- 
     return 0;
 }
