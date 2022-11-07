@@ -37,6 +37,7 @@ class grafo{
         grafo boruvska();
         grafo prim();
         grafo kruskal();
+        bool esConexo();
         bool buscarCamino(int x, int y);
         bool existeCamino(int x, int y);
         void agruparDFS(int x, int *v, int cont);
@@ -263,6 +264,20 @@ bool grafo::buscarCamino(int x, int y){
     }
 }
 
+bool grafo::esConexo(){
+    bool respuesta = true;
+    for(int i=0; i<numVertices; i++){
+        for(int j=0; j<numVertices; j++){
+            if(i != j){
+                if(existeCamino(i, j) == 0){
+                    respuesta = false;
+                }
+            }
+        }
+    }
+    return respuesta;
+}
+
 parista minimo(pvertice p){
     parista min = p->adyacente;
     parista aux = p->adyacente;
@@ -369,12 +384,20 @@ void grafo::unirGrupos(grafo G, int *v){
 void grafo::unirSubgrafos(grafo G){
     int *v = new int[numVertices];
     int cont;
-    
+    int numeroAristas = G.getNumAristas();
+    int *aristasOrigen = new int[numeroAristas];
+    int *aristasDestino = new int[numeroAristas];
+    int *pesos = new int[numeroAristas];
+    int contAristas = 0;
+    pvertice p;
+
+    while(!esConexo()){
         cont = 0;
+        contAristas = 0;
         for (int i = 0; i < numVertices; i++){
             v[i] = -1;
         }
-
+        
         for(int i  = 0; i < numVertices; i++){
             if(v[i] == -1){
                 agruparDFS(i, v, cont);
@@ -382,10 +405,48 @@ void grafo::unirSubgrafos(grafo G){
                 cont++;
             }
         }
-        cont--;
+        for(int i = 0; i < numVertices; i++){
+            cout << v[i] << " ";
+        }
 
-        unirGrupos(G, v);   
-    
+        for(int i = 0; i < numVertices; i++){
+            for(int j = 0; j < numVertices; j++){
+                if(i != j){ // Diferentes vertice
+                    if(v[i] != v[j]){ //Diferentes grupos
+                        aristasOrigen[contAristas] = i;
+                        aristasDestino[contAristas] = j;
+                        //pesos[contAristas] = a->peso;
+                        cout<<"Arista: "<<i<<" "<<j<<endl;
+                        contAristas++;
+                        G.eliminarArista(i, j);
+                        
+                    
+                        cout << "Arista eliminada: " << i << " " << j << endl;
+                    }
+                }
+            }
+        }
+
+        for(int i = 0; i < contAristas; i++){
+            for(int j = 0; j < contAristas - 1; j++){
+                if(pesos[j] > pesos[j+1]){
+                    int aux = pesos[j];
+                    pesos[j] = pesos[j+1];
+                    pesos[j+1] = aux;
+
+                    aux = aristasOrigen[j];
+                    aristasOrigen[j] = aristasOrigen[j+1];
+                    aristasOrigen[j+1] = aux;
+
+                    aux = aristasDestino[j];
+                    aristasDestino[j] = aristasDestino[j+1];
+                    aristasDestino[j+1] = aux;
+                }
+            }
+        }
+
+        insertarArista(aristasOrigen[0], aristasDestino[0], pesos[0]);
+    }
     
 }
 
@@ -496,7 +557,7 @@ int main(){
     cout << "Arbol de expansion minima Boruvska: " << endl;
     B.mostrarGrafo();
     limpiar(B.getNumVertices());
-    
+    //B.unirSubgrafos(G);
     P = G.prim();
     cout << "Arbol de expansion minima Boruvska: " << endl;
     P.mostrarGrafo();
